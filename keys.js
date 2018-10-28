@@ -1,6 +1,6 @@
 //console.log('this is loaded');
 
 module.exports = {
-  id: process.env.SPOTIFY_ID,
-  secret: process.env.SPOTIFY_SECRET
+  fKey: process.env.FANDANGO_KEY,
+  fSecret: process.env.FANDANGO_SECRET
 };
