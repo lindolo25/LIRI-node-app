@@ -21,6 +21,7 @@
     "dotenv": "^6.1.0",
     "inquirer": "^6.2.0",
     "moment": "^2.22.2",
+    "node-geocoder": "^3.22.0",
     "request": "^2.88.0",
     "weather-js": "^2.0.0"
   }

@@ -1,28 +1,74 @@
 require("dotenv").config();
 var inquirer = require('inquirer');
-var APIs = require('./apis.js');
+var API_s = require('./apis.js');
 
-console.log(APIs);
+var userName = null;
+var userLocation = null;
+var userWeather = null;
+var currentWeather = null;
+init();
 
-showMain();
+function init()
+{
+    inquirer.prompt([{
+        type: "input",
+        message: "Please type in your name:",
+        name: "name"
+    },
+    {
+        type: "input",
+        message: "Please type in your current location:",
+        name: "loc"
+    }])
+    .then(function(response) 
+    {
+        var name = response.name.trim();
+        var loc = response.loc.trim();
+
+        if(name && loc)
+        {
+            userName = name;
+            console.log("Loading location ...");
+            API_s.geocoder.find(loc, function(response) 
+            {
+                
+                userLocation = response;
+                console.log("Loading weather information ...");
+                API_s.weather.find(userLocation.toString(), function(response)
+                {
+                    userWeather = response;
+                    showMain();
+                });
+            });
+        }
+        else {
+            console.log("Please fill your name and location to continue.\n");
+            init();
+        }
+    });
+}
 
 function showMain()
 {
+    currentWeather = userWeather;
     inquirer.prompt([{
         type: "list",
-        message: "\nWelcome, choose your interest to continue.\n",
-        choices: ["Movies", "Live Music shows", "Exit"],
+        message: "\nWelcome "+ userName +", how can I help you? (Choose from the options below)\n",
+        choices: ["Current weather", "Forecast", "Search other cities", "Exit"],
         name: "Main"
     },])
     .then(function(response) 
     {
         switch(response.Main)
         {
-            case "Movies":
-                showMovies();
+            case "Current weather":
+                printCurrentWeather(showMain);
                 break;
-            case "Live Music shows":
-                showMusic();
+            case "Forecast":
+                printForecast(showMain);
+                break;
+            case "Search other cities":
+                search();
                 break;
             case "Exit":
                 break;
@@ -34,64 +80,76 @@ function showMain()
     });
 }
 
-function showMovies()
+function showMenu()
 {
     inquirer.prompt([{
         type: "list",
-        message: "\nMovies are great, what are you looking for?\n",
-        choices: ["Find a Movie", "Find Showtimes Nearby", "Back to Main Menu"],
-        name: "Movies"
+        message: "\nWelcome "+ userName +", how can I help you? (Choose from the options below)\n",
+        choices: ["Show weather", "Show Forecast", "Go Back", "Exit"],
+        name: "Main"
     },])
     .then(function(response) 
     {
-        switch(response.Movies)
+        switch(response.Main)
         {
-            case "Find a Movie":
-                console.log("The user requested: " + response.Movies);
+            case "Show weather":
+                printCurrentWeather(showMenu);
+                break;
+            case "Show Forecast":
+                printForecast(showMenu);
+                break;
+            case "Go Back":
                 showMain();
                 break;
-            case "Find Showtimes Nearby":
-                console.log("The user requested: " + response.Movies);
-                showMain();
-                break;
-            case "Back to Main Menu":
-                showMain();
+            case "Exit":
                 break;
             default:
                 console.log("Please make a choise to continue.\n");
-                showMovies();
+                showMenu();
                 break;
         }
     });
 }
 
-function showMusic()
+function printCurrentWeather(goTo)
+{
+    console.log(currentWeather);
+    goTo();
+}
+
+function printForecast(goTo)
+{
+    console.log(currentWeather.forecast);
+    goTo();
+}
+
+function search()
 {
     inquirer.prompt([{
-        type: "list",
-        message: "\nLets go LIVE!\n",
-        choices: ["Find your Band", "Look for Shows in Town", "Back to Main Menu"],
-        name: "Music"
-    },])
+        type: "input",
+        message: "Please type in the location:",
+        name: "loc"
+    }])
     .then(function(response) 
     {
-        switch(response.Music)
+        var loc = response.loc.trim();
+
+        if(loc)
         {
-            case "Find your Band":
-                console.log("The user requested: " + response.Movies);
-                showMain();
-                break;
-            case "Look for Shows in Town":
-                console.log("The user requested: " + response.Movies);
-                showMain();
-                break;
-            case "Back to Main Menu":
-                showMain();
-                break;
-            default:
-                console.log("Please make a choise to continue.\n");
-                showMusic();
-                break;
+            console.log("Loading location ...");
+            API_s.geocoder.find(loc, function(response) 
+            {
+                console.log("Loading weather information ...");
+                API_s.weather.find(response.toString(), function(response)
+                {
+                    currentWeather = response;
+                    showMenu();
+                });
+            });
+        }
+        else {
+            console.log("Please fill your name and location to continue.\n");
+            init();
         }
     });
 }

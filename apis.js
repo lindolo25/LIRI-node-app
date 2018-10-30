@@ -23,12 +23,14 @@ var APIs = {
             findListener: function(err, result, callback)
             {
                 var response = null;
-                if(!err) response = {
-                        location: result.location.name,
-                        lat: result.location.lat,
-                        lng: result.location.long,
-                        current: result.current,
-                        forecast: result.forecast
+                console.log(err);
+                console.log(result);
+                if(!err && result.length > 0) response = {
+                        location: result[0].location.name,
+                        lat: result[0].location.lat,
+                        lng: result[0].location.long,
+                        current: result[0].current,
+                        forecast: result[0].forecast
                     }
                 
                 callback(response);
@@ -55,22 +57,22 @@ var APIs = {
             findListener: function(err, result, callback)
             {
                 var response = null;
-                if(!err) 
-                {
-                    response = {
-                        lat: result.latitude,
-                        lng: result.longitude,
-                        country: result.country,
-                        contryCode: result.countryCode,
-                        city: result.city,
-                        stateCode: result.stateCode,
-                        zipcode: result.zipcode,
+                //console.log(err);
+                //console.log(result);
+                if(!err && result.length > 0)  response = {
+                        lat: result[0].latitude,
+                        lng: result[0].longitude,
+                        country: result[0].country,
+                        contryCode: result[0].countryCode,
+                        city: result[0].city,
+                        stateCode: result[0].stateCode,
+                        zipcode: result[0].zipcode,
                         toString: function()
                         {
                             return "{0}, {1}".format(this.city, this.stateCode);
                         }
                     }
-                }
+                
                 callback(response);
             }
 
@@ -78,7 +80,7 @@ var APIs = {
 
         find: function(loc, callback)
         {
-            geocoder.geocode(loc, function(err, data) 
+            this.geocoderApp.geocode(loc, function(err, data) 
             {
                 APIs.geocoder.internal.findListener(err, data, callback);
             });
