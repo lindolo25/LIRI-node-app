@@ -1,4 +1,5 @@
-var keys = require('./keys.js');
+var weather = require('weather-js');
+var NodeGeocoder = require("node-geocoder");
 
 String.prototype.format = String.prototype.f = function() 
 {
@@ -13,41 +14,76 @@ String.prototype.format = String.prototype.f = function()
 
 var APIs = {
 
-    fandango: {
-        key: keys.fKey,
-        secret: keys.fSecret,
+    weather: {
+
+        weatherApp: weather,
+
         internals: {
 
-            sha256Encode: function (stringToEncode) 
+            findListener: function(err, result, callback)
             {
-                var crypto = require('crypto');
-                var result = crypto.createHash('sha256').update(stringToEncode).digest('hex');
-                return result;
-            },
-            
-            buildAuthParameters: function (apiKey, sharedSecret)
-            {
-                var seconds = Math.floor(new Date() / 1000);
-                var paramsToEncode = apiKey + sharedSecret + seconds;
-                var encodedParams = sha256Encode(paramsToEncode);
-                var result = 'apikey={0}&sig={1}'.format(apiKey, encodedParams);
-                return result;
-            },
-            
-            buildURI: function (op, zipCode) {
-               
-                var baseUri = 'http://api.fandango.com';
-                var apiVersion = '1';
-                var authorizationParameters = this.buildAuthParameters(APIs.fandango.key, APIs.fandango.secret);
-                var requestUri = '{0}/v{1}/?op={2}&postalcode={3}&{4}'.format(baseUri, apiVersion, op, zipCode, authorizationParameters);
-                return requestUri;
+                var response = null;
+                if(!err) response = {
+                        location: result.location.name,
+                        lat: result.location.lat,
+                        lng: result.location.long,
+                        current: result.current,
+                        forecast: result.forecast
+                    }
+                
+                callback(response);
             }
 
+        },
+
+        find: function(loc, callback, degreeType = "F")
+        {
+            this.weatherApp.find({ search: loc, degreeType: degreeType }, function(err, result) 
+            {
+                APIs.weather.internals.findListener(err, result, callback);
+            });
         }
+
     },
 
-    bandsInTown : {
-        key : keys.secret
+    geocoder: {
+
+        geocoderApp: NodeGeocoder({ provider: "mapquest", apiKey: process.env.GEOCODER_KEY}),
+        
+        internal: {
+            
+            findListener: function(err, result, callback)
+            {
+                var response = null;
+                if(!err) 
+                {
+                    response = {
+                        lat: result.latitude,
+                        lng: result.longitude,
+                        country: result.country,
+                        contryCode: result.countryCode,
+                        city: result.city,
+                        stateCode: result.stateCode,
+                        zipcode: result.zipcode,
+                        toString: function()
+                        {
+                            return "{0}, {1}".format(this.city, this.stateCode);
+                        }
+                    }
+                }
+                callback(response);
+            }
+
+        },
+
+        find: function(loc, callback)
+        {
+            geocoder.geocode(loc, function(err, data) 
+            {
+                APIs.geocoder.internal.findListener(err, data, callback);
+            });
+        }
+
     }
 
 }
