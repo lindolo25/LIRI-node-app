@@ -114,6 +114,7 @@ function showMenu()
 function printCurrentWeather(goTo)
 {
     console.log(currentWeather);
+    console.log("{0}:\t\t{1}".format("field", "value"));
     goTo();
 }
 
