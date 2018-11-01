@@ -23,8 +23,8 @@ var APIs = {
             findListener: function(err, result, callback)
             {
                 var response = null;
-                console.log(err);
-                console.log(result);
+                //console.log(err);
+                //console.log(result);
                 if(!err && result.length > 0) response = {
                         location: result[0].location.name,
                         lat: result[0].location.lat,

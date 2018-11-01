@@ -113,14 +113,38 @@ function showMenu()
 
 function printCurrentWeather(goTo)
 {
-    console.log(currentWeather);
-    console.log("{0}:\t\t{1}".format("field", "value"));
+    if (!currentWeather) 
+    {
+        console.log("No information about this location.");
+        showMain();
+        return;
+    }
+    //console.log(currentWeather);
+    console.log("{0}:\t\t{1}".format("Date", currentWeather.current.date));
+    console.log("{0}:\t{1}".format("Temperature", currentWeather.current.temperature));
+    console.log("{0}:\t\t{1}".format("Sky", currentWeather.current.skytext));
+    console.log("{0}:\t{1}".format("Humidity", currentWeather.current.humidity));
+    console.log("{0}:\t\t{1}".format("Wind", currentWeather.current.winddisplay));
     goTo();
 }
 
 function printForecast(goTo)
 {
-    console.log(currentWeather.forecast);
+    if (!currentWeather) 
+    {
+        console.log("No information about this location.");
+        showMain();
+        return;
+    }
+    //console.log(currentWeather.forecast);
+    for(i in currentWeather.forecast)
+    {
+        console.log("{0}:\t{1}".format("Date", currentWeather.forecast[i].date));
+        console.log("{0}:\t{1}".format("Day", currentWeather.forecast[i].day));
+        console.log("{0}:\t{1}".format("Low", currentWeather.forecast[i].low));
+        console.log("{0}:\t{1}".format("High", currentWeather.forecast[i].high));
+        console.log("{0}:\t{1}\n".format("Sky", currentWeather.forecast[i].skytextday));  
+    }
     goTo();
 }
 
